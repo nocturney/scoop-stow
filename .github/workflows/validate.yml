@@ -1,0 +1,31 @@
+name: Validate Scoop bucket
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Validate manifest and release hash
+        shell: powershell
+        run: |
+          $manifest = Get-Content ./bucket/trayify.json -Raw | ConvertFrom-Json
+          if (-not $manifest.version) { throw "Missing version" }
+          if (-not $manifest.url) { throw "Missing url" }
+          if (-not $manifest.hash) { throw "Missing hash" }
+
+          $file = Join-Path $env:RUNNER_TEMP 'Trayify.exe'
+          Invoke-WebRequest -Uri $manifest.url -OutFile $file
+          $actual = (Get-FileHash $file -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $manifest.hash.ToLowerInvariant()) {
+            throw "SHA-256 mismatch: expected $($manifest.hash), got $actual"
+          }
