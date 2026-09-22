@@ -15,15 +15,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Validate manifest and release hash
+      - name: Validate active STOW manifest
         shell: powershell
         run: |
-          $manifest = Get-Content ./bucket/trayify.json -Raw | ConvertFrom-Json
-          if (-not $manifest.version) { throw "Missing version" }
-          if (-not $manifest.url) { throw "Missing url" }
-          if (-not $manifest.hash) { throw "Missing hash" }
+          $path = './bucket/stow.json'
+          if (-not (Test-Path $path)) {
+            Write-Host 'No stable STOW manifest yet; bucket intentionally remains empty during preview.'
+            exit 0
+          }
 
-          $file = Join-Path $env:RUNNER_TEMP 'Trayify.exe'
+          $manifest = Get-Content $path -Raw | ConvertFrom-Json
+          if (-not $manifest.version) { throw 'Missing version' }
+          if (-not $manifest.url) { throw 'Missing url' }
+          if (-not $manifest.hash) { throw 'Missing hash' }
+          if ($manifest.version -match '-') { throw 'Active Scoop channel must not publish prerelease versions.' }
+          if ($manifest.url -notmatch '/nocturney/STOW/releases/download/v') { throw 'Manifest URL must use an immutable STOW GitHub release asset.' }
+
+          $file = Join-Path $env:RUNNER_TEMP 'STOW.exe'
           Invoke-WebRequest -Uri $manifest.url -OutFile $file
           $actual = (Get-FileHash $file -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($actual -ne $manifest.hash.ToLowerInvariant()) {

@@ -1,29 +1,31 @@
-# Trayify Scoop Bucket
+# STOW Scoop Bucket
 
-Official Scoop bucket for [Trayify](https://github.com/nocturney/trayify).
+Official Scoop bucket for [STOW](https://github.com/nocturney/STOW).
 
-## Install
+STOW is currently in preview. The normal Scoop channel intentionally remains empty until the first stable STOW release, because Scoop's GitHub version checker ignores prereleases by default.
+
+## Stable install
+
+Once a stable manifest is published:
 
 ```powershell
-scoop bucket add trayify https://github.com/nocturney/scoop-trayify
-scoop install trayify
+scoop bucket add stow https://github.com/nocturney/scoop-stow
+scoop install stow
 ```
 
 ## Update
 
 ```powershell
 scoop update
-scoop update trayify
+scoop update stow
 ```
 
 ## Uninstall
 
 ```powershell
-scoop uninstall trayify
+scoop uninstall stow
 ```
 
-Trayify is installed by Scoop in portable mode. User configuration remains under:
+STOW is installed by Scoop in portable/package-managed mode. Scoop remains responsible for upgrades; STOW's self-updater does not take over package-managed copies.
 
-`%APPDATA%\Trayify`
-
-The manifest tracks immutable versioned GitHub Release assets and verifies SHA-256 checksums.
+Legacy Trayify metadata is retained under `legacy/` for historical reference only and is not part of the active bucket.
